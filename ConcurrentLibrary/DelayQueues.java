@@ -3,41 +3,22 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-/**
- * This is an unbounded BlockingQueue of objects that implement the Delayed
- * interface
- * 
- * - DelayQueue keeps the elements internally until a certain delay has expired
- * 
- * - an object can only be taken from the queue when its delay has expired !!! -
- * 
- * We cannot place null items in the queue - The queue is sorted so that the
- * object at the head has a delay that has expired for the longest time.
- * 
- * If no delay has expired, then there is no head element and poll( ) will
- * return null
- * 
- * size() return the count of both expired and unexpired items !!!
- *
- */
-
 public class DelayQueues {
 
 	public static void main(String[] args) {
-
-		BlockingQueue<DelayedWorker> blockingQueue = new DelayQueue<DelayedWorker>();
+		BlockingQueue<DelayedWorker> blockingQueue = new DelayQueue<>();
 
 		try {
-			blockingQueue.put(new DelayedWorker(1000, "This is message #1"));
-			blockingQueue.put(new DelayedWorker(10000, "This is message #2"));
-			blockingQueue.put(new DelayedWorker(4000, "This is message #3"));
+			blockingQueue.put(new DelayedWorker(1000, "Task 1", () -> System.out.println("Executing Task 1")));
+			blockingQueue.put(new DelayedWorker(10000, "Task 2", () -> System.out.println("Executing Task 2")));
+			blockingQueue.put(new DelayedWorker(4000, "Task 3", () -> System.out.println("Executing Task 3")));
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
 		while (!blockingQueue.isEmpty()) {
 			try {
-				System.out.println(blockingQueue.take());
+				blockingQueue.take().executeTask();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -49,28 +30,27 @@ class DelayedWorker implements Delayed {
 
 	private long duration;
 	private String message;
+	private Runnable task; // Добавлен Runnable для выполнения задачи
 
-	public DelayedWorker(long duration, String message) {
+	public DelayedWorker(long duration, String message, Runnable task) {
 		this.duration = System.currentTimeMillis() + duration;
 		this.message = message;
+		this.task = task;
 	}
 
 	@Override
 	public int compareTo(Delayed otherDelayed) {
-		if (this.duration < ((DelayedWorker) otherDelayed).getDuration()) {
-			return -1;
-		}
-		
-		if (this.duration > ((DelayedWorker) otherDelayed).getDuration()) {
-			return 1;
-		}
-		
-		return 0;
+		return Long.compare(this.duration, ((DelayedWorker) otherDelayed).getDuration());
 	}
 
 	@Override
 	public long getDelay(TimeUnit timeUnit) {
 		return timeUnit.convert(duration - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+	}
+
+	public void executeTask() {
+		System.out.println(message);
+		task.run();
 	}
 
 	public long getDuration() {
@@ -89,8 +69,13 @@ class DelayedWorker implements Delayed {
 		this.message = message;
 	}
 
-	@Override
-	public String toString() {
-		return this.message;
+	public Runnable getTask() {
+		return task;
 	}
+
+	public void setTask(Runnable task) {
+		this.task = task;
+	}
+
+	// Остальные методы класса...
 }

@@ -1,3 +1,4 @@
+import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -66,7 +67,7 @@ public class PriorityBlockingQueues {
 
 	public static void main(String[] args) {
 		
-		BlockingQueue<String> queue = new PriorityBlockingQueue<>();
+		BlockingQueue<String> queue = new PriorityBlockingQueue<>(10, Comparator.reverseOrder());
 
 		FirstPriorityBlockingQueueWorker firstWorker = new FirstPriorityBlockingQueueWorker(queue);
 		SecondPriorityBlockingQueueWorker secondWorker = new SecondPriorityBlockingQueueWorker(queue);

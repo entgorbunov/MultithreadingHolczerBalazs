@@ -26,9 +26,9 @@ class FirstBlockingQueueWorker implements Runnable {
 	@Override
 	public void run() {
 		try {
-			blockingQueue.put("A");
+			blockingQueue.put("B");
             Thread.sleep(1000);
-            blockingQueue.put("B");
+            blockingQueue.put("A");
             Thread.sleep(1000);
             blockingQueue.put("C");
         } catch (InterruptedException e) {
